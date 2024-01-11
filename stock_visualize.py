@@ -28,6 +28,23 @@ def string_to_number(df, column):
 
     return df
 
+def computeRSI(data, time_window):
+    diff = data.diff(1).dropna()
+
+    up_chg = 0*diff
+    down_chg = 0*diff
+
+    up_chg[diff>0] = diff[diff>0]
+    down_chg[diff<0] = diff[diff<0]
+
+    up_chg_avg = up_chg.ewm(com=time_window-1, min_periods = time_window).mean()
+    down_chg_avg = down_chg.ewm(com=time_window-1, min_periods = time_window).mean()
+
+
+    rs = abs(up_chg_avg/down_chg_avg)
+    rsi = 100- 100/(1+rs)
+    return rsi
+
 def read_data_ohlc(filename, stock_code, usecols):
     df = pd.read_csv(filename, header=None, usecols=usecols, names = ["time", stock_code, 'change', 'volume', 'target'],
                         index_col='time', parse_dates=['time'])
@@ -54,7 +71,7 @@ def read_data_ohlc(filename, stock_code, usecols):
     data['MA5'] = data['close'].rolling(5).mean()
     data['MA10'] = data['close'].rolling(10).mean()
     data['MA20'] = data['close'].rolling(20).mean()
-
+    data['RSI'] = computeRSI(data['close'], 14)
 
     """data['MA1'] = data['close'].rolling(1).mean()
     data['MA5'] = data['close'].rolling(5).mean()
@@ -68,7 +85,6 @@ def read_data_ohlc(filename, stock_code, usecols):
     data.reset_index(drop=True, inplace = True)
 
     return data, latest_price, latest_change, df['target'].iloc[-1], df['volume'].iloc[-1]
-
 
 
 # Line Chart design
@@ -118,7 +134,11 @@ ax3 = fig.add_subplot(gs[1, 4:6])
 ax4 = fig.add_subplot(gs[2, 4:6])
 ax5 = fig.add_subplot(gs[3, 4:6])
 ax6 = fig.add_subplot(gs[4, 4:6])
-ax8 = fig.add_subplot(gs[5, 0:4])
+ax7 = fig.add_subplot(gs[5, 4:6])
+
+
+ax8 = fig.add_subplot(gs[4, 0:4])
+ax9 = fig.add_subplot(gs[5, 0:4])
 def animate(i):
 
     """time_stamp = datetime.datetime.now() - datetime.timedelta(hours=1) # 1 hour faster than time in Nashville
