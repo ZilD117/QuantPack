@@ -7,5 +7,5 @@ Plotting Functions finished.
 
 Algorithim to be added. 
 
-For ongoing files/codes, please go to scratch branch.
+For Testing files, please navigate to scratch branch. main branch is for correct code only. 
 
